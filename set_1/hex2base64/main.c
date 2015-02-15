@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define LOWEST_SIX_BYTES_SET 63
 #define LOWEST_FOUR_BYTES_SET 15
@@ -162,10 +163,52 @@ void test_convert_triplet()
 
 int main(void)
 {
-    test_base64letter();
-    test_determine_buffersize();
-    test_hex2nibble();
-    test_nibbles2byte();
-    test_convert_triplet();
+    /* test_base64letter(); */
+    /* test_determine_buffersize(); */
+    /* test_hex2nibble(); */
+    /* test_nibbles2byte(); */
+    /* test_convert_triplet(); */
+
+    char input_buff[256];
+    char * output_buff;
+    unsigned int input_strlen, output_bufflen, i,j, k, groups_of_three,
+                 remainder = 0;
+
+    scanf("%s", input_buff);
+
+    input_strlen = strnlen(input_buff, 256);
+    output_bufflen = determine_buffersize(input_strlen);
+
+    output_buff = malloc(output_bufflen);
+
+    groups_of_three = input_strlen / 6;
+    remainder = input_strlen % 6;
+
+    for(i = 0, j = 0, k = 0; i < groups_of_three; i++, j = i*6, k += 4){
+        convert_triplet(nibbles2byte(hex2nibble(input_buff[j]),
+                    hex2nibble(input_buff[j+1])),
+                nibbles2byte(hex2nibble(input_buff[j+2]),
+                    hex2nibble(input_buff[j+3])),
+                nibbles2byte(hex2nibble(input_buff[j+4]),
+                    hex2nibble(input_buff[j+5])),
+                &(output_buff[k]));
+    }
+
+    if(remainder == 4){
+        convert_triplet(nibbles2byte(hex2nibble(input_buff[j]),
+                    hex2nibble(input_buff[j+1])),
+                nibbles2byte(hex2nibble(input_buff[j+2]),
+                    hex2nibble(input_buff[j+3])),
+                0, &(output_buff[k]));
+    } else if(remainder == 2) {
+        convert_triplet(nibbles2byte(hex2nibble(input_buff[j]),
+                    hex2nibble(input_buff[j+1])),
+                0, 0, &(output_buff[k]));
+    }
+
+
+    output_buff[output_bufflen-1] = 0;
+    puts(output_buff);
+    free(output_buff);
     return 0;
 }
