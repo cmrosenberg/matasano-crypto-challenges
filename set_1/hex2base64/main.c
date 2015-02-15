@@ -174,6 +174,7 @@ int main(void)
     unsigned int input_strlen, output_bufflen, i,j, k, groups_of_three,
                  remainder = 0;
 
+
     scanf("%s", input_buff);
 
     input_strlen = strnlen(input_buff, 256);
@@ -200,10 +201,13 @@ int main(void)
                 nibbles2byte(hex2nibble(input_buff[j+2]),
                     hex2nibble(input_buff[j+3])),
                 0, &(output_buff[k]));
+        output_buff[k+3] = '=';
     } else if(remainder == 2) {
         convert_triplet(nibbles2byte(hex2nibble(input_buff[j]),
                     hex2nibble(input_buff[j+1])),
                 0, 0, &(output_buff[k]));
+        output_buff[k+2] = '=';
+        output_buff[k+3] = '=';
     }
 
 
