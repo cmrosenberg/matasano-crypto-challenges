@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #define LOWEST_SIX_BYTES_SET 63
+#define LOWEST_FOUR_BYTES_SET 15
+#define LOWEST_TWO_BYTES_SET 3
 
 char base64letter(char byte)
 {
@@ -69,9 +71,24 @@ unsigned int determine_buffersize(unsigned int hexbuff_len)
     return (groups_of_six * 4) + (remainder / 2) + 1;
 }
 
+void convert_triplet(const unsigned char a, const unsigned char b,
+        const unsigned char c, char * buff)
+{
+    char helper;
+
+    buff[0] = base64letter(a >> 2);
+
+    helper = (a & LOWEST_TWO_BYTES_SET) << 4;
+    buff[1] = base64letter(helper | (b >> 4));
+
+    helper = ((b & LOWEST_FOUR_BYTES_SET) << 2);
+    buff[2] = base64letter(helper | (c >> 6));
+
+    buff[3] = base64letter(c & LOWEST_SIX_BYTES_SET);
+}
+
 void test_base64letter()
 {
-
     char i;
 
     fprintf(stderr, "Testing base64letter():\n");
@@ -124,11 +141,31 @@ void test_hex2nibble()
     assert(hex2nibble('F') == 0xF);
 }
 
+void test_convert_triplet()
+{
+    char buff[4];
+    buff[0] = 0;
+    buff[1] = 0;
+    buff[2] = 0;
+    buff[3] = 0;
+
+    convert_triplet(0x49, 0x27, 0x6d, buff);
+    assert(buff[0] == 'S');
+    printf("%c\n", buff[0]);
+    assert(buff[1] == 'S');
+    printf("%c\n", buff[1]);
+    assert(buff[2] == 'd');
+    printf("%c\n", buff[2]);
+    assert(buff[3] == 't');
+    printf("%c\n", buff[3]);
+}
+
 int main(void)
 {
     test_base64letter();
     test_determine_buffersize();
     test_hex2nibble();
     test_nibbles2byte();
+    test_convert_triplet();
     return 0;
 }
